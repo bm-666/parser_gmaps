@@ -15,21 +15,27 @@ DATE = {
     "лет" : 365
 }
 
-def get_number_of_days(*args):
-    """Преобразование периода когда был написан отзыв в строковое представление даты"""
-    try:
-        period = DATE[args[1]]
-        days = int(args[0]) * period
-    except KeyError:
-        days = None     
-    return days
+class BaseConfig(object):
+    #Базовый класс конфигурации
+    def __init__(self, filename):
+        with open(filename, "r") as f:
+            self.cfg = yaml.load(f, Loader=yaml.Loader)
 
 
-
+class Config(BaseConfig):
+    #Методы  возвращают кофиги для необходимых ресурсов
+    file_config = "config.yaml"
+    
+    def __init__(self):
+        super().__init__(self.file_config)
+    
+    def get_config_db(self):
+        """Получаем данные для подключения к БД"""
+        return self.cfg['database']
 
 
 def date_comment(string_date:str) -> str:
-    """Преобразование строки даты в формат DD.MM.YYYY"""    
+    #Преобразование строки даты в формат DD.MM.YYYY"""    
     try:
         if len(string_date) == 0:
             print("Необходимо передать параметры")
@@ -50,30 +56,12 @@ def count_comment(args):
     if args[2] is None:
         args = args[0:2]+(0,)
     return args
-
-
-class BaseConfig(object):
-    """Базовый класс конфигурации"""
-    def __init__(self, filename):
-        with open(filename, "r") as f:
-            self.cfg = yaml.load(f, Loader=yaml.Loader)
-
-
-class Config(BaseConfig):
-    """Методы  возвращают кофиги для необходимых ресурсов"""
-    file_config = "config.yaml"
     
-    def __init__(self):
-        super().__init__(self.file_config)
-    
-    def get_config_db(self):
-        """Получаем данные для подключения к БД"""
-        return self.cfg['database']
-       
-
-
-
-        
-
-
-
+def get_number_of_days(*args):
+    #Получаем количество дней с моммента написани отзыва
+    try:
+        period = DATE[args[1]]
+        days = int(args[0]) * period
+    except KeyError:
+        days = None     
+    return days
