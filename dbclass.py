@@ -12,12 +12,12 @@ class BaseDB(object):
 
 
 class DataBaseManager(BaseDB, object):
-    #класс операциямий с бд
+    #Класс работы с бд
     def __init__(self) -> None:
         super().__init__()
         if self.cfg is None:
             self.cfg = Config().get_config_db()
-        #получаем коннект курсор
+        #Создаем подключение к бд
         self.connect = psycopg2.connect(
             dbname=self.cfg['dbname'],user=self.cfg['user'],
             password=self.cfg['password'], host=self.cfg['host'], 
@@ -26,7 +26,7 @@ class DataBaseManager(BaseDB, object):
         self.connect.autocommit = True
     
     def execute(self, sql:str):
-        #выолнение команд не требуищих возврата данных
+        #Выполнение команд не требуищих возврата данных
         self.cursor.execute(sql)    
     
     def select_url(self, sql):
