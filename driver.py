@@ -16,8 +16,8 @@ class Webdriver:
     
     def __init__(self, browser="chrome"):
         options_chrome = webdriver.ChromeOptions()
-        options_chrome.add_argument('--headless')
-        options_chrome.add_argument('--no-sandbox')
+        #options_chrome.add_argument('--headless')
+        #options_chrome.add_argument('--no-sandbox')
         self.driver = webdriver.Chrome(options=options_chrome)
         self.driver.set_window_size(self.width,self.hight)
 

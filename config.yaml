@@ -1,0 +1,6 @@
+database:
+    dbname: db_clients_statistics
+    user: admin_parser
+    password: M45Rt@oM
+    host: localhost
+    port: 5432

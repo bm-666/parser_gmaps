@@ -69,73 +69,74 @@ class DataBaseToParser(DataBaseManager, SQLCommands):
 
 
 class Parser(Locators, DriverObjectManager):
-   name = "google"
+    name = "google"
    
-   def __init__(self, *data_parser):
-    super(DriverObjectManager, self).__init__()   
+    def __init__(self, *data_parser):
+        super(DriverObjectManager, self).__init__()
    
-   def count_like(self, l:int, element):
+   
+    def count_like(self, l:int, element):
     #Получаем колличество лайков отзыва
-    if l > 0:
-        like = self.find_element(element,By.TAG_NAME, "button").text
-        if like == 'Нравится':
-            like = 0
+        if l > 0:
+            like = self.find_element(element,By.TAG_NAME, "button").text
+            if like == 'Нравится':
+                like = 0
+            else:
+                like = int(like)
         else:
-            like = int(like)
-    else:
-        like = 0
-    return like    
-   
-   def review_parsing(self,element, userid):
-    # Парсим отзыв
-    date = date_comment(self.find_element(element, By.CLASS_NAME,self.DATE_COMMENT).text)
-    rating = self.find_element(element, By.CLASS_NAME, self.RAITING_REVIEW).get_attribute("aria-label").split()[1]
-    raiting = int(rating.split(",")[0])    
-    author = self.find_elements(element,By.TAG_NAME, "a")[1].text
-    text_list = self.find_elements(element, By.XPATH, self.TEXT) 
-    dislike = 0
-    full_text = self.find_element(element, By.CLASS_NAME, self.MORE_TEXT)
-    
-    if full_text is not None:    
-        full_text.click()
-        text = self.find_element(element,By.CLASS_NAME, self.FULL_TEXT).text    
-    
-    elif full_text is None:
-        text = text_list[1].text
-    
-    like = self.count_like(len(text), element)    
-    review = ("google",1,"Опубликован", author,text,date,like,dislike, raiting, userid)
-    
-    if None not in review:
-        return review    
-    else:
-        raise Exception(f"Результат не должен содержать None: {review}")
-   
-   def run(self, url:tuple):
-    #Запуск парсера    
-    date_parse = dt.strftime(dt.now(), "%d.%m.%Y")
-    self.get_url(url[1])
+            like = 0
         
-    card = self.load_element((By.XPATH, self.CARD_INFO))
-    text = card.text.split("\n")
+        return like    
    
-    # Забираем рейтинг количество отзывов
-    raiting = text[0]
-    count = text[1].split(" ")[0]
-    count = int(count)
+    def review_parsing(self,element, userid):
+        # Парсим отзыв
+        date = date_comment(self.find_element(element, By.CLASS_NAME,self.DATE_COMMENT).text)
+        rating = self.find_element(element, By.CLASS_NAME, self.RAITING_REVIEW).get_attribute("aria-label").split()[1]
+        raiting = int(rating.split(",")[0])    
+        author = self.find_elements(element,By.TAG_NAME, "a")[1].text
+        text_list = self.find_elements(element, By.XPATH, self.TEXT) 
+        dislike = 0
+        full_text = self.find_element(element, By.CLASS_NAME, self.MORE_TEXT)
     
-    self.find_element(card, By.TAG_NAME, "a").click()
+        if full_text is not None:    
+            full_text.click()
+            text = self.find_element(element,By.CLASS_NAME, self.FULL_TEXT).text    
     
-    if self.load_element(self.SECTION_REVIEWS) is not None:
-        scrol = self.load_element(self.SCROLL_ELEMENT)    
-        result = self.scroll_element(scrol,self.REVIEW, count)
-    else:
-        raise Exception("Элемент не загрузился") 
+        elif full_text is None:
+            text = text_list[1].text
     
-    list_reviews = list(map(lambda i: self.review_parsing(i, url[0]), result))
+        like = self.count_like(len(text), element)    
+        review = ("google",1,"Опубликован", author,text,date,like,dislike, raiting, userid)
     
-    #Итоговые данные парсинга за текущий день
-    parse_result = {
+        if None not in review:
+            return review    
+        else:
+            raise Exception(f"Результат не должен содержать None: {review}")
+   
+    def run(self, url:tuple):
+    #Запуск парсера    
+        date_parse = dt.strftime(dt.now(), "%d.%m.%Y")
+        self.get_url(url[1])
+        
+        card = self.load_element((By.XPATH, self.CARD_INFO))
+        text = card.text.split("\n")
+        # Забираем рейтинг количество отзывов
+        raiting = text[0]
+        count = text[1].split(" ")[0]
+        count = int(count)
+    
+        self.find_element(card, By.TAG_NAME, "a").click()
+    
+        if self.load_element(self.SECTION_REVIEWS) is not None:
+            scrol = self.load_element(self.SCROLL_ELEMENT)    
+            result = self.scroll_element(scrol,self.REVIEW, count)
+        else:
+            raise Exception("Элемент не загрузился") 
+    
+        list_reviews = list(map(lambda i: self.review_parsing(i, url[0]), result))
+    
+        #Итоговые данные парсинга за текущий день
+        parse_result = {
             url[0]: {
                 "date": date_parse,
                 "raiting": raiting,
@@ -144,7 +145,7 @@ class Parser(Locators, DriverObjectManager):
             }
         }
 
-    return  parse_result
+        return  parse_result
 
 
     
@@ -155,7 +156,6 @@ def parsing_map(url):
    
 
 if __name__ == '__main__':
-    
     dbp = DataBaseToParser()
     list_url =[count_comment(i) for i in dbp.select_url(dbp.SELECT_URL)]
     name = Parser.name
