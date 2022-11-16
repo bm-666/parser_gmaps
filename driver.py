@@ -1,5 +1,7 @@
-import time
+from proxy import background_js, manifest_json
 
+import time
+import zipfile
 
 from selenium.webdriver import chrome
 from selenium.webdriver.chrome import options
@@ -10,16 +12,23 @@ from selenium.webdriver.support import expected_conditions as EC
 from seleniumwire import webdriver
 
 
+
 class Webdriver:
     width=1366
-    hight=844
+    height=844
     
-    def __init__(self, browser="chrome"):
+    def __init__(self, browser="chrome", proxy=False):
         options_chrome = webdriver.ChromeOptions()
-        #options_chrome.add_argument('--headless')
-        #options_chrome.add_argument('--no-sandbox')
+        if proxy:
+            plugin = 'proxy_auth_plugin.zip'
+            with zipfile.ZipFile(plugin, 'w') as zp:
+                zp.writestr("manifest.json", manifest_json)
+                zp.writestr("background.js", background_js)
+            options_chrome.add_extension(plugin)
+        options_chrome.add_argument('--headless')
+        options_chrome.add_argument('--no-sandbox')
         self.driver = webdriver.Chrome(options=options_chrome)
-        self.driver.set_window_size(self.width,self.hight)
+        self.driver.set_window_size(self.width,self.height)
 
 class DriverObjectManager(Webdriver):
     
@@ -35,11 +44,9 @@ class DriverObjectManager(Webdriver):
         try:
             element = WebDriverWait(self.driver, timeout).until(
             EC.presence_of_element_located(locator))
-        
         except Exception as e:
             print("Ошибка в переданных параметрах:\n{}".format(locator))
             element = None
-        
         return element
     
     def load_elements(self, locator, timeout=40):

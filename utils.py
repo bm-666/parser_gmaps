@@ -1,5 +1,4 @@
 from datetime import datetime as dt, timedelta
-
 import yaml
 
 
@@ -32,7 +31,9 @@ class Config(BaseConfig):
     def get_config_db(self):
         """Получаем данные для подключения к БД"""
         return self.cfg['database']
-
+    def get_config_proxy(self):
+        """Получаем настйроки прокси"""
+        return self.cfg['proxy']
 
 def date_comment(string_date:str) -> str:
     #Преобразование строки даты в формат DD.MM.YYYY"""    
